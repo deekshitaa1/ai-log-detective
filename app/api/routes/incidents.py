@@ -155,7 +155,11 @@ async def analyze_incident(
             detail="Project not found",
         )
 
-    repository = getattr(project, "repository", None)
+    repository = (
+        f"{project.github_owner}/{project.github_repo}"
+        if project.github_owner and project.github_repo
+        else None
+    )
 
     location = await localize_code(
         rca,
@@ -212,3 +216,4 @@ async def analyze_incident(
             "validation_steps": repair.validation_steps,
         },
     }
+
