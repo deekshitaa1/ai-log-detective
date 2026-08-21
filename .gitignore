@@ -46,3 +46,5 @@ htmlcov/
 # Temporary backups
 *.backup
 *.before-verification
+
+ai-log-detective/
