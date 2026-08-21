@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 
 
 DATABASE_HOST = "payments-primary"
@@ -13,8 +13,14 @@ async def get_database_connection():
     that AegisAI will inspect during code localization.
     """
 
-    await asyncio.sleep(0.01)
+    for attempt in range(3):
+        try:
+            await asyncio.sleep(0.01)
 
-    raise TimeoutError(
-        f"Database connection timeout: {DATABASE_HOST}"
-    )
+            raise TimeoutError(
+                f"Database connection timeout: {DATABASE_HOST}"
+            )
+
+        except TimeoutError:
+            if attempt == 2:
+                raise
