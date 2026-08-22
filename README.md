@@ -1,200 +1,248 @@
 <div align="center">
 
-# AI Log Detective
-
-### Production Incident Investigation Target for AegisAI
-
-**A deliberately structured payment service built to turn production-style failures into traceable engineering evidence.**
+<img src="assets/aegis-hero.svg" alt="AI Log Detective — Production Reliability Investigation" width="100%">
 
 <br>
 
-<img src="https://img.shields.io/badge/Python-010D19?style=for-the-badge&logo=python&logoColor=EDBE91" alt="Python">
-<img src="https://img.shields.io/badge/FastAPI-010D19?style=for-the-badge&logo=fastapi&logoColor=D99B91" alt="FastAPI">
-<img src="https://img.shields.io/badge/Production%20Reliability-010D19?style=for-the-badge&logoColor=B48195" alt="Production Reliability">
-<img src="https://img.shields.io/badge/AI%20Investigation-010D19?style=for-the-badge&logoColor=856E8D" alt="AI Investigation">
-
-<br><br>
-
-<table>
-<tr>
-<td align="center" width="25%"><b>01</b><br><sub>INCIDENT</sub></td>
-<td align="center" width="25%"><b>02</b><br><sub>EVIDENCE</sub></td>
-<td align="center" width="25%"><b>03</b><br><sub>LOCALIZATION</sub></td>
-<td align="center" width="25%"><b>04</b><br><sub>REMEDIATION</sub></td>
-</tr>
-</table>
+<img src="https://img.shields.io/badge/PYTHON-010D19?style=for-the-badge&logo=python&logoColor=EDBE91" alt="Python">
+<img src="https://img.shields.io/badge/FASTAPI-010D19?style=for-the-badge&logo=fastapi&logoColor=D99B91" alt="FastAPI">
+<img src="https://img.shields.io/badge/RELIABILITY_ENGINEERING-010D19?style=for-the-badge&logoColor=B48195" alt="Reliability Engineering">
+<img src="https://img.shields.io/badge/AI_INVESTIGATION-010D19?style=for-the-badge&logoColor=856E8D" alt="AI Investigation">
 
 </div>
 
 ---
 
-## 01 — What This Repository Is
+# AI Log Detective
 
-**AI Log Detective is not the AI engine itself.** It is the **production-like application under investigation** by the AegisAI Reliability Engine.
+### A production-style incident investigation target for AegisAI
 
-The repository contains a small FastAPI payment service with a deliberately defined database dependency and failure path. This gives AegisAI a realistic target against which it can perform:
+AI Log Detective is a deliberately structured **FastAPI payment service** designed to provide a realistic failure surface for the **AegisAI Reliability Engine**.
 
-```text
-Production-style failure
-        │
-        ▼
-     Log event
-        │
-        ▼
-   Incident context
-        │
-        ▼
-  Evidence correlation
-        │
-        ▼
-    Root-cause analysis
-        │
-        ▼
-    Code localization
-        │
-        ▼
- services/payment-api/app/database.py
-        │
-        ▼
-     Repair candidate
-```
+It gives an AI reliability workflow something concrete to investigate: a service, a dependency, an observable failure, application logs, source boundaries, and a reproducible path from incident evidence to code localization.
 
-The important distinction is architectural: **this repository provides the failure surface; AegisAI provides the investigation and controlled remediation workflow.**
+> **This repository is the system under investigation. AegisAI is the system doing the investigation and controlled remediation.**
 
 ---
 
-## 02 — The Engineering Problem
+## The System in One View
 
-In a real production incident, an error message is only the beginning.
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                         PRODUCTION INCIDENT                         │
+└──────────────────────────────────┬──────────────────────────────────┘
+                                   │
+                                   ▼
+                         ┌─────────────────┐
+                         │   LOG EVIDENCE  │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │    DETECTION     │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │   CORRELATION    │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │      RCA         │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                 ┌────────────────────────────────┐
+                 │       CODE LOCALIZATION        │
+                 │  services/payment-api/app/     │
+                 │          database.py            │
+                 └────────────────┬───────────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │ REPAIR CANDIDATE │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │ VALIDATE / VERIFY│
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │  GITHUB PULL     │
+                         │    REQUEST       │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                           HUMAN REVIEW
+```
 
-An engineer needs to answer:
+The design goal is not autonomous production mutation. The goal is **evidence-backed investigation followed by controlled, reviewable remediation**.
 
-| Question | Investigation target |
-|---|---|
-| What failed? | Payment request / database dependency |
-| Where did it fail? | `services/payment-api/app/database.py` |
-| Which dependency is involved? | `payments-primary` |
-| What is the failure mode? | Database connection timeout |
-| Where should an investigator look? | `get_database_connection()` |
-| What should the system eventually produce? | Evidence-backed code localization and repair candidate |
+---
 
-This repository exists to make those questions concrete rather than theoretical.
+## 01 — Why This Repository Exists
+
+During a production incident, an error message is only the starting point.
+
+An engineer needs to determine:
+
+- what failed;
+- which service or dependency is involved;
+- which evidence belongs to the incident;
+- where the failure reaches the application code;
+- what source location should be inspected;
+- whether a repair is appropriate;
+- and whether a proposed change can be safely reviewed.
+
+AI Log Detective creates that investigation surface in a compact service.
+
+### Investigation chain
+
+```text
+Failure
+  │
+  ├── Service: payment-api
+  │
+  ├── Dependency: payments-primary
+  │
+  ├── Failure: database connection timeout
+  │
+  ├── Log: database timeout while processing payment
+  │
+  └── Source boundary:
+          services/payment-api/app/database.py
+                  │
+                  └── get_database_connection()
+```
+
+---
+
+## 02 — Architecture
+
+```text
+                         AegisAI
+                Reliability Investigation Engine
+                              │
+                              │ investigates
+                              ▼
+                 ┌──────────────────────────┐
+                 │     AI LOG DETECTIVE      │
+                 │                          │
+                 │      payment-api         │
+                 └────────────┬─────────────┘
+                              │
+                ┌─────────────┴─────────────┐
+                │                           │
+                ▼                           ▼
+        ┌───────────────┐           ┌────────────────┐
+        │  payments.py  │           │  database.py   │
+        │               │           │                │
+        │ POST /payments│──────────▶│ connection     │
+        │ error logging │           │ boundary       │
+        └───────────────┘           └───────┬────────┘
+                                            │
+                                            ▼
+                                     payments-primary
+                                            │
+                                            ▼
+                                     timeout / failure
+```
+
+The separation matters. The application is intentionally independent from the AI investigation engine, allowing the reliability workflow to inspect a known target instead of being coupled to its own implementation.
 
 ---
 
 ## 03 — Failure Surface
 
-The payment service defines a primary database dependency:
+The target service defines a primary database dependency:
 
 ```text
 DATABASE_HOST   = payments-primary
 DATABASE_REGION = ap-south-1
 ```
 
-The connection boundary is implemented in:
+The dependency boundary lives at:
 
 ```text
 services/payment-api/app/database.py
 ```
 
-The connection routine performs a bounded three-attempt sequence and ultimately preserves the underlying `TimeoutError` when the dependency remains unavailable.
+and is exposed through:
 
 ```text
 get_database_connection()
-        │
-        ├── attempt 1
-        ├── attempt 2
-        └── attempt 3
-              │
-              ▼
-       TimeoutError preserved
 ```
 
-This bounded behavior is intentional: it creates a concrete execution path that can be inspected by the reliability workflow.
+The current failure path is intentionally bounded:
+
+```text
+get_database_connection()
+       │
+       ├── attempt 1
+       │
+       ├── attempt 2
+       │
+       └── attempt 3
+              │
+              ▼
+        TimeoutError
+```
+
+The final timeout remains visible rather than being silently swallowed. This gives an investigation system a concrete failure signal and a clear source boundary.
 
 ---
 
-## 04 — Request Path
-
-The payment API exposes a `/payments` router and a health endpoint.
+## 04 — Request Flow
 
 ```text
 POST /payments
-       │
-       ▼
+      │
+      ▼
 process_payment()
-       │
-       ▼
+      │
+      ▼
 get_database_connection()
-       │
-       ▼
+      │
+      ▼
 payments-primary
-       │
-       ├── connection succeeds → payment continues
-       │
-       └── timeout → logged failure → HTTP 503
+      │
+      ├──────── available ────────▶ continue payment
+      │
+      └──────── timeout ──────────▶ log exception
+                                      │
+                                      ▼
+                                   HTTP 503
 ```
 
-The application also exposes:
+The service also provides:
 
 ```text
 GET /health
 ```
 
-with a healthy `payment-api` service response.
+for service health verification.
 
 ---
 
-## 05 — Why This Is Useful for AegisAI
+## 05 — What AegisAI Can Investigate
 
-AegisAI is designed around the following reliability pipeline:
+| Investigation stage | Target in this repository |
+|:---|:---|
+| Incident | Payment-service failure |
+| Evidence | Application timeout log |
+| Dependency | `payments-primary` |
+| Failure mode | Database connection timeout |
+| Service | `payment-api` |
+| Request boundary | `POST /payments` |
+| Code boundary | `services/payment-api/app/database.py` |
+| Function | `get_database_connection()` |
+| Error response | HTTP `503` |
+| Remediation boundary | Candidate change reviewed through AegisAI |
 
-```text
-┌──────────────────────────────────────────────────────────────┐
-│                    PRODUCTION INCIDENT                       │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                               ▼
-┌──────────────────────────────────────────────────────────────┐
-│                         LOG EVIDENCE                          │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                               ▼
-┌──────────────────────────────────────────────────────────────┐
-│                         DETECTION                             │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                               ▼
-┌──────────────────────────────────────────────────────────────┐
-│                        CORRELATION                            │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                               ▼
-┌──────────────────────────────────────────────────────────────┐
-│                    ROOT-CAUSE ANALYSIS                        │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                               ▼
-┌──────────────────────────────────────────────────────────────┐
-│                       CODE LOCALIZATION                       │
-│        services/payment-api/app/database.py                   │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                               ▼
-┌──────────────────────────────────────────────────────────────┐
-│                     REPAIR CANDIDATE                          │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                               ▼
-┌──────────────────────────────────────────────────────────────┐
-│                 VALIDATION + SAFETY CHECKS                    │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                               ▼
-                         GITHUB PULL REQUEST
-```
-
-This makes the repository a **controlled investigation target** rather than a toy error generator.
+This is intentionally more specific than a generic "log analyzer" demo: the system has a **known service topology, dependency boundary, failure mode and source location**.
 
 ---
 
@@ -203,13 +251,16 @@ This makes the repository a **controlled investigation target** rather than a to
 ```text
 ai-log-detective/
 │
+├── assets/
+│   └── aegis-hero.svg             # Repository visual identity
+│
 ├── services/
 │   └── payment-api/
 │       ├── app/
 │       │   ├── __init__.py
-│       │   ├── database.py       # Database dependency + failure boundary
-│       │   ├── main.py           # FastAPI application entry point
-│       │   └── payments.py       # Payment request flow + error handling
+│       │   ├── database.py        # Dependency + timeout boundary
+│       │   ├── main.py            # FastAPI application
+│       │   └── payments.py        # Payment flow + error handling
 │       │
 │       └── requirements.txt
 │
@@ -217,13 +268,14 @@ ai-log-detective/
 └── README.md
 ```
 
-### Key source boundaries
+### Source responsibilities
 
-| File | Responsibility |
-|---|---|
-| `main.py` | Creates the FastAPI application and `/health` endpoint |
-| `payments.py` | Handles payment requests and converts database timeout failures into HTTP 503 responses |
-| `database.py` | Defines the `payments-primary` dependency and bounded connection attempt behavior |
+| File | Role |
+|:---|:---|
+| `main.py` | FastAPI application and `/health` endpoint |
+| `payments.py` | Payment endpoint, database call and timeout handling |
+| `database.py` | Database dependency boundary and bounded retry behavior |
+| `requirements.txt` | Python service dependencies |
 
 ---
 
@@ -233,101 +285,121 @@ ai-log-detective/
 
 | Layer | Technology |
 |:---|:---|
-| Runtime | Python |
-| API framework | FastAPI |
-| Service design | REST API |
-| Logging | Python `logging` |
-| Dependency boundary | Async database connection abstraction |
-| Investigation consumer | AegisAI Reliability Engine |
+| Runtime | **Python** |
+| API | **FastAPI** |
+| Async execution | **asyncio** |
+| Logging | **Python logging** |
+| Service style | **REST API** |
+| Investigation consumer | **AegisAI Reliability Engine** |
 
 </div>
 
 ---
 
-## 08 — Investigation Target at a Glance
+## 08 — Example Incident
+
+A payment request enters the service:
 
 ```text
-SERVICE
-└── payment-api
-
-DEPENDENCY
-└── payments-primary
-    └── region: ap-south-1
-
-FAILURE
-└── Database connection timeout
-
-SOURCE BOUNDARY
-└── services/payment-api/app/database.py
-    └── get_database_connection()
-
-REQUEST HANDLER
-└── services/payment-api/app/payments.py
-    └── POST /payments
-
-FAILURE RESPONSE
-└── HTTP 503
-    └── Payment service temporarily unavailable
+POST /payments
 ```
+
+The handler requests a connection to:
+
+```text
+payments-primary
+```
+
+The connection boundary encounters:
+
+```text
+Database connection timeout: payments-primary
+```
+
+The application logs the failure while processing the payment request and returns:
+
+```text
+503 Service Unavailable
+Payment service temporarily unavailable
+```
+
+AegisAI can then reason over the relationship:
+
+```text
+HTTP 503
+   │
+   └── payment processing failure
+            │
+            └── database timeout
+                    │
+                    └── payments-primary
+                            │
+                            └── database.py
+                                  │
+                                  └── get_database_connection()
+```
+
+That is the core purpose of this repository: **make the path from symptom to source location explicit and testable.**
 
 ---
 
-## 09 — Design Principle
+## 09 — Design Principles
 
-The repository intentionally keeps the failure **observable and bounded**.
+### Observable
 
-A reliability system should be able to identify the failure without requiring the target application to hide it behind artificial abstraction.
+Failures remain visible in application behavior and logs.
 
-The payment service therefore preserves the underlying timeout after its bounded retry path, while the request layer records the incident and returns a service-unavailable response.
+### Bounded
 
-That gives AegisAI a traceable chain:
+The demonstrated connection path has an explicit retry limit rather than an unbounded loop.
 
-```text
-Exception
-   ↓
-Application log
-   ↓
-Incident evidence
-   ↓
-Service correlation
-   ↓
-Source localization
-   ↓
-Repair boundary
-```
+### Traceable
+
+The dependency, service, request handler and source boundary can be connected during investigation.
+
+### Separated
+
+The application being investigated is separate from the AI reliability engine performing the investigation.
+
+### Reviewable
+
+The broader AegisAI workflow treats remediation as a candidate that must pass validation and safety checks before reaching a GitHub pull request.
 
 ---
 
-## 10 — How It Fits Into the Larger System
+## 10 — Visual System
+
+The repository now uses a restrained **dark reliability-engineering visual language** rather than a generic developer theme.
+
+### Palette
+
+| Token | Hex | Role |
+|:---|:---:|:---|
+| `MIDNIGHT` | `#010D19` | Infrastructure foundation |
+| `SAND` | `#EDBE91` | Primary diagnostic signal |
+| `ROSE` | `#D99B91` | Incident / evidence signal |
+| `MAUVE` | `#B48195` | Investigation / localization |
+| `VIOLET` | `#856E8D` | Remediation / system depth |
+
+### Visual language
 
 ```text
-                     AegisAI
-          AI-Powered Reliability Engine
-                       │
-        ┌──────────────┴──────────────┐
-        │                             │
-        ▼                             ▼
- Incident Investigation       Controlled Remediation
-        │                             │
-        └──────────────┬──────────────┘
-                       │
-                       ▼
-              AI Log Detective
-                       │
-                       ▼
-                payment-api
-                       │
-          ┌────────────┴────────────┐
-          │                         │
-          ▼                         ▼
-      payments.py              database.py
-          │                         │
-          └────────────┬────────────┘
-                       ▼
-                Failure Evidence
+Dark infrastructure
+       +
+Warm diagnostic signals
+       +
+Muted rose / mauve layers
+       +
+Monospace technical labels
+       +
+Thin architectural lines
+       +
+Controlled depth
+       =
+Reliability engineering identity
 ```
 
-The target application remains separate from the remediation engine. This separation is important for testing investigation logic without allowing the investigation system to become the application it is supposed to inspect.
+The palette is deliberately muted and technical. No decorative emoji system is used.
 
 ---
 
@@ -340,167 +412,122 @@ git clone https://github.com/deekshitaa1/ai-log-detective.git
 cd ai-log-detective
 ```
 
-### Install dependencies
+### Install
 
 ```bash
 cd services/payment-api
 pip install -r requirements.txt
 ```
 
-### Run the API
+### Run
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-The service exposes:
+### Endpoints
 
 ```text
 GET  /health
 POST /payments
 ```
 
-FastAPI documentation is available through the standard development server documentation route.
+The FastAPI development server also exposes its standard API documentation interface.
 
 ---
 
-## 12 — Example Investigation Scenario
+## 12 — Relationship to AegisAI
 
-A payment request reaches the service:
+AI Log Detective is intentionally the **investigation target**, not the remediation engine.
 
-```text
-POST /payments
-```
-
-The request attempts to obtain a database connection:
+The larger AegisAI workflow is:
 
 ```text
-get_database_connection()
+                         AI LOG DETECTIVE
+                                │
+                                ▼
+                         Incident evidence
+                                │
+                                ▼
+                             Detect
+                                │
+                                ▼
+                            Correlate
+                                │
+                                ▼
+                               RCA
+                                │
+                                ▼
+                            Localize
+                                │
+                                ▼
+                             Propose
+                                │
+                                ▼
+                            Validate
+                                │
+                                ▼
+                             Verify
+                                │
+                                ▼
+                          GitHub PR
+                                │
+                                ▼
+                          Human review
 ```
 
-The dependency is unavailable:
-
-```text
-payments-primary
-```
-
-The application records:
-
-```text
-Database connection timeout while processing payment request
-```
-
-The request returns:
-
-```text
-503 Service Unavailable
-```
-
-The investigation target is therefore localized around:
-
-```text
-services/payment-api/app/database.py
-```
-
-and specifically:
-
-```text
-get_database_connection()
-```
-
-This is the evidence chain that AegisAI is designed to consume.
+The final boundary is deliberately a **reviewable change**, not an uncontrolled production edit.
 
 ---
 
-## 13 — Professional Color System
+## 13 — Repository Identity
 
-The README uses a restrained engineering palette based on the supplied visual reference.
-
-<table>
-<tr>
-<td width="20%" bgcolor="#010D19"><br><br></td>
-<td width="20%" bgcolor="#EDBE91"><br><br></td>
-<td width="20%" bgcolor="#D99B91"><br><br></td>
-<td width="20%" bgcolor="#B48195"><br><br></td>
-<td width="20%" bgcolor="#856E8D"><br><br></td>
-</tr>
-<tr>
-<td align="center"><code>#010D19</code><br><sub>Core background</sub></td>
-<td align="center"><code>#EDBE91</code><br><sub>Primary accent</sub></td>
-<td align="center"><code>#D99B91</code><br><sub>Warm signal</sub></td>
-<td align="center"><code>#B48195</code><br><sub>Secondary signal</sub></td>
-<td align="center"><code>#856E8D</code><br><sub>Deep accent</sub></td>
-</tr>
-</table>
-
-The palette is intentionally muted: **dark infrastructure foundation + warm diagnostic accents**, rather than a playful or overly colorful developer aesthetic.
+**Name:** AI Log Detective  
+**Role:** Production incident investigation target  
+**Domain:** Reliability Engineering / AI-assisted debugging  
+**Primary service:** FastAPI payment API  
+**Failure class:** Database connectivity timeout  
+**Primary source boundary:** `services/payment-api/app/database.py`
 
 ---
 
 ## 14 — Engineering Intent
 
-This repository is intentionally small because its purpose is not to demonstrate how many files can be written.
+This repository is small by design.
 
-Its purpose is to provide a **clear, reproducible failure surface** that an AI reliability system can investigate.
-
-The design emphasizes:
+It does not try to demonstrate complexity through hundreds of files. It provides a clean and reproducible failure surface so an AI reliability system can demonstrate something more important:
 
 ```text
-Observable failure
-        +
-Traceable dependency
-        +
-Clear source boundary
-        +
-Bounded behavior
-        +
-Reviewable remediation
-        ─────────────────────
-        =
-Reliable AI investigation target
+Can the system move from
+
+        production symptom
+              ↓
+          evidence
+              ↓
+        likely cause
+              ↓
+        source location
+              ↓
+       bounded repair
+              ↓
+      validated change
+
+without losing traceability or control?
 ```
+
+That is the engineering problem this repository exists to support.
 
 ---
 
-## 15 — Related System
-
-**AegisAI Reliability Engine** consumes this repository as an investigation target and is designed to move from production evidence toward a reviewable remediation workflow.
-
-The larger system follows:
-
-```text
-Detect
-  ↓
-Correlate
-  ↓
-Analyze
-  ↓
-Localize
-  ↓
-Propose
-  ↓
-Validate
-  ↓
-Verify
-  ↓
-Create PR
-  ↓
-Human Review
-```
-
-The final engineering boundary is deliberately a pull request rather than an uncontrolled production modification.
-
----
-
-## 16 — Repository
+## 15 — Repository
 
 <div align="center">
 
-**AI Log Detective**
+[**View AI Log Detective on GitHub**](https://github.com/deekshitaa1/ai-log-detective)
 
-Production-style payment service for AI-assisted reliability investigation.
+<br><br>
 
-[View Repository](https://github.com/deekshitaa1/ai-log-detective)
+<sub>Evidence first. Localization second. Remediation under control.</sub>
 
 </div>
 
@@ -508,8 +535,10 @@ Production-style payment service for AI-assisted reliability investigation.
 
 <div align="center">
 
-### Evidence first. Localization second. Remediation under control.
+`010D19` · `EDBE91` · `D99B91` · `B48195` · `856E8D`
 
-<sub>Built as an investigation target for AegisAI Reliability Engineering.</sub>
+**AI Log Detective**
+
+<sub>Production-style investigation target for AegisAI Reliability Engineering.</sub>
 
 </div>
