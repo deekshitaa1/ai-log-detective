@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" role="img" aria-labelledby="title desc">
+  <title id="title">AI Log Detective — Production Reliability Investigation</title>
+  <desc id="desc">Dark navy engineering interface with layered incident, evidence, localization and remediation nodes.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#010D19"/>
+      <stop offset="0.55" stop-color="#071522"/>
+      <stop offset="1" stop-color="#0C1724"/>
+    </linearGradient>
+    <linearGradient id="warm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EDBE91"/>
+      <stop offset="1" stop-color="#D99B91"/>
+    </linearGradient>
+    <linearGradient id="rose" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#D99B91"/>
+      <stop offset="1" stop-color="#B48195"/>
+    </linearGradient>
+    <linearGradient id="violet" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#B48195"/>
+      <stop offset="1" stop-color="#856E8D"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#D99B91" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="520" rx="28" fill="url(#bg)"/>
+  <rect width="1600" height="520" rx="28" fill="url(#grid)"/>
+  <path d="M0 410 C280 330 390 465 690 380 S1160 300 1600 390" fill="none" stroke="#856E8D" stroke-opacity="0.18" stroke-width="2"/>
+  <path d="M0 435 C300 360 430 490 720 410 S1190 340 1600 415" fill="none" stroke="#EDBE91" stroke-opacity="0.10" stroke-width="1"/>
+
+  <g transform="translate(92 82)">
+    <text x="0" y="0" fill="#EDBE91" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="4">RELIABILITY ENGINEERING / INVESTIGATION TARGET</text>
+    <text x="0" y="68" fill="#F7F2EC" font-family="Inter,Arial,sans-serif" font-size="56" font-weight="800">AI LOG DETECTIVE</text>
+    <text x="0" y="110" fill="#D7C7C2" font-family="Inter,Arial,sans-serif" font-size="22">A production-style payment service designed for evidence-driven</text>
+    <text x="0" y="142" fill="#D7C7C2" font-family="Inter,Arial,sans-serif" font-size="22">incident analysis, code localization and controlled remediation.</text>
+
+    <g transform="translate(0 198)">
+      <rect x="0" y="0" width="172" height="62" rx="14" fill="#0B1B29" stroke="#EDBE91" stroke-opacity="0.55"/>
+      <circle cx="24" cy="31" r="7" fill="#EDBE91" filter="url(#glow)"/>
+      <text x="44" y="27" fill="#F7F2EC" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700">INCIDENT</text>
+      <text x="44" y="47" fill="#AFA4A5" font-family="Inter,Arial,sans-serif" font-size="12">production signal</text>
+
+      <path d="M182 31H226" stroke="#D99B91" stroke-width="2"/>
+      <path d="M219 24L227 31L219 38" fill="none" stroke="#D99B91" stroke-width="2"/>
+
+      <rect x="236" y="0" width="172" height="62" rx="14" fill="#0B1B29" stroke="#D99B91" stroke-opacity="0.55"/>
+      <circle cx="260" cy="31" r="7" fill="#D99B91" filter="url(#glow)"/>
+      <text x="280" y="27" fill="#F7F2EC" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700">EVIDENCE</text>
+      <text x="280" y="47" fill="#AFA4A5" font-family="Inter,Arial,sans-serif" font-size="12">logs + context</text>
+
+      <path d="M418 31H462" stroke="#B48195" stroke-width="2"/>
+      <path d="M455 24L463 31L455 38" fill="none" stroke="#B48195" stroke-width="2"/>
+
+      <rect x="472" y="0" width="172" height="62" rx="14" fill="#0B1B29" stroke="#B48195" stroke-opacity="0.55"/>
+      <circle cx="496" cy="31" r="7" fill="#B48195" filter="url(#glow)"/>
+      <text x="516" y="27" fill="#F7F2EC" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700">LOCALIZE</text>
+      <text x="516" y="47" fill="#AFA4A5" font-family="Inter,Arial,sans-serif" font-size="12">source boundary</text>
+
+      <path d="M654 31H698" stroke="#856E8D" stroke-width="2"/>
+      <path d="M691 24L699 31L691 38" fill="none" stroke="#856E8D" stroke-width="2"/>
+
+      <rect x="708" y="0" width="172" height="62" rx="14" fill="#0B1B29" stroke="#856E8D" stroke-opacity="0.65"/>
+      <circle cx="732" cy="31" r="7" fill="#856E8D" filter="url(#glow)"/>
+      <text x="752" y="27" fill="#F7F2EC" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700">REMEDIATE</text>
+      <text x="752" y="47" fill="#AFA4A5" font-family="Inter,Arial,sans-serif" font-size="12">validate → verify → PR</text>
+    </g>
+  </g>
+
+  <g transform="translate(1060 72)">
+    <polygon points="190,0 380,76 190,152 0,76" fill="#101F2D" stroke="#EDBE91" stroke-opacity="0.45"/>
+    <polygon points="0,76 190,152 190,230 0,154" fill="#0A1723" stroke="#D99B91" stroke-opacity="0.30"/>
+    <polygon points="380,76 190,152 190,230 380,154" fill="#0C1A28" stroke="#B48195" stroke-opacity="0.30"/>
+    <text x="190" y="70" text-anchor="middle" fill="#F7F2EC" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="800">PAYMENT API</text>
+    <text x="190" y="98" text-anchor="middle" fill="#D7C7C2" font-family="Inter,Arial,sans-serif" font-size="13">investigation surface</text>
+    <circle cx="190" cy="155" r="20" fill="#856E8D" fill-opacity="0.22" stroke="#856E8D"/>
+    <circle cx="190" cy="155" r="6" fill="#EDBE91" filter="url(#glow)"/>
+    <text x="190" y="205" text-anchor="middle" fill="#AFA4A5" font-family="monospace" font-size="11">database.py</text>
+  </g>
+
+  <g transform="translate(1130 350)">
+    <rect x="0" y="0" width="330" height="92" rx="16" fill="#091724" stroke="#856E8D" stroke-opacity="0.55"/>
+    <text x="22" y="29" fill="#EDBE91" font-family="monospace" font-size="12">TARGET BOUNDARY</text>
+    <text x="22" y="55" fill="#F7F2EC" font-family="monospace" font-size="14">get_database_connection()</text>
+    <text x="22" y="76" fill="#AFA4A5" font-family="monospace" font-size="11">TimeoutError / bounded retries</text>
+  </g>
+</svg>
