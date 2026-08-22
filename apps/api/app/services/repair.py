@@ -1,4 +1,5 @@
-﻿from dataclasses import dataclass
+﻿import ast
+from dataclasses import dataclass
 from difflib import unified_diff
 
 from app.models import RepositoryFile
@@ -17,37 +18,34 @@ class RepairProposal:
 
 
 def _normalize_content(content: str) -> str:
-    """
-    Normalize GitHub source content without changing its semantics.
-    """
-    if content.startswith("\ufeff"):
-        content = content[1:]
+    if not isinstance(content, str):
+        return ""
 
-    if content.startswith("ï»¿"):
-        content = content[3:]
+    content = content.lstrip("\ufeff")
+    content = content.replace("\r\n", "\n").replace("\r", "\n")
+    return content
 
-    return content.replace("\r\n", "\n").replace("\r", "\n")
+
+def _is_valid_python(content: str) -> bool:
+    try:
+        ast.parse(content)
+        return True
+    except SyntaxError:
+        return False
 
 
 def _generate_database_timeout_repair(
     content: str,
 ) -> str | None:
-    """
-    Generate one deterministic repair for the known database
-    connectivity failure.
 
-    The transformation is intentionally narrow: it replaces the
-    existing database timeout operation with bounded retry handling.
-    """
-
-    old_block = '''    await asyncio.sleep(0.01)
+    old_block = """    await asyncio.sleep(0.01)
 
     raise TimeoutError(
         f"Database connection timeout: {DATABASE_HOST}"
     )
-'''
+"""
 
-    new_block = '''    for attempt in range(3):
+    new_block = """    for attempt in range(3):
         try:
             await asyncio.sleep(0.01)
 
@@ -58,45 +56,67 @@ def _generate_database_timeout_repair(
         except TimeoutError:
             if attempt == 2:
                 raise
-'''
+"""
 
-    occurrences = content.count(old_block)
-
-    if occurrences != 1:
+    if content.count(old_block) != 1:
         return None
 
-    return content.replace(
-        old_block,
-        new_block,
-        1,
+    proposed = content.replace(old_block, new_block, 1)
+
+    if not _is_valid_python(proposed):
+        return None
+
+    return proposed
+
+
+def _manual_proposal(
+    original: str,
+    reason: str,
+) -> RepairProposal:
+
+    return RepairProposal(
+        repair_type="manual-investigation-required",
+        summary="No safe automatic repair pattern was identified.",
+        rationale=reason,
+        original_content=original,
+        proposed_content=original,
+        diff="",
+        risk_level="high",
+        validation_checks=[
+            "Manual code review required",
+            "Python syntax validation",
+        ],
     )
 
 
 def generate_repair_proposal(
     repository_file: RepositoryFile,
 ) -> RepairProposal:
-    original = _normalize_content(repository_file.content)
+
+    original = _normalize_content(
+        repository_file.content or ""
+    )
+
+    if repository_file.language not in (None, "python"):
+        return _manual_proposal(
+            original,
+            "The current repair engine only supports Python.",
+        )
+
+    if not _is_valid_python(original):
+        return _manual_proposal(
+            original,
+            "The localized repository source is not valid Python. "
+            "The repair engine refuses to modify malformed source.",
+        )
 
     proposed = _generate_database_timeout_repair(original)
 
     if proposed is None:
-        return RepairProposal(
-            repair_type="manual-investigation-required",
-            summary=(
-                "No safe automatic repair pattern was identified."
-            ),
-            rationale=(
-                "The localized source did not match the exact "
-                "database-timeout pattern required by the current "
-                "safe repair engine."
-            ),
-            original_content=original,
-            proposed_content=original,
-            diff="",
-            risk_level="high",
-            validation_checks=[
-                "Manual code review required",
-            ],
+        return _manual_proposal(
+            original,
+            "The source did not match the exact validated "
+            "database-timeout repair pattern.",
         )
 
     diff = "".join(
@@ -115,11 +135,10 @@ def generate_repair_proposal(
             "connection boundary."
         ),
         rationale=(
-            "Localization identified the database connection "
-            "boundary as the highest-confidence source of the "
-            "observed timeout. The proposed change adds a bounded "
-            "three-attempt retry policy while preserving the final "
-            "TimeoutError."
+            "The database connection boundary was identified as "
+            "the highest-confidence source of the timeout. "
+            "The repair adds exactly three bounded attempts while "
+            "preserving the final TimeoutError."
         ),
         original_content=original,
         proposed_content=proposed,
